@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
 <title>Cargora</title>
 
@@ -8,74 +10,57 @@
 
 body{
 font-family:Arial;
+background:#f2f2f2;
 margin:0;
-background:#f4f6f8;
 }
 
 header{
-background:#0f172a;
+background:#0c1c3c;
 color:white;
-padding:20px;
-font-size:22px;
-font-weight:bold;
+padding:15px;
+font-size:20px;
 }
 
 .container{
-max-width:900px;
+max-width:800px;
 margin:auto;
-padding:30px;
+padding:20px;
 }
 
 .card{
 background:white;
-padding:18px;
+padding:15px;
 border-radius:8px;
 margin-bottom:15px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-input,select{
+input,select,button{
+width:100%;
 padding:10px;
-margin-bottom:8px;
+margin-top:8px;
 border-radius:6px;
 border:1px solid #ccc;
-width:100%;
+font-size:15px;
 }
 
 button{
-padding:10px 15px;
-border:none;
-background:#0a7cff;
+background:#2f6fed;
 color:white;
-border-radius:6px;
+border:none;
 cursor:pointer;
 }
 
 .valor{
+color:#2f6fed;
 font-size:20px;
-color:#2563eb;
 font-weight:bold;
-}
-
-.rota{
-font-size:18px;
-margin-bottom:6px;
-}
-
-.distancia{
-color:#666;
-font-size:14px;
-margin-bottom:6px;
-}
-
-.tipo{
-font-size:14px;
-color:#444;
 }
 
 </style>
 
 </head>
+
 
 <body>
 
@@ -83,51 +68,24 @@ color:#444;
 🚛 Cargora
 </header>
 
-<div class="container">
 
-<h2>Publicar carga</h2>
+<div class="container">
 
 <div class="card">
 
-<input list="cidades" id="origem_cidade" placeholder="Cidade origem">
+<h2>Publicar carga</h2>
 
-<select id="origem_estado">
-<option>SP</option>
-<option>PR</option>
-<option>MG</option>
-<option>SC</option>
-<option>RS</option>
-<option>RJ</option>
-<option>ES</option>
-<option>BA</option>
-<option>GO</option>
-<option>MT</option>
-<option>MS</option>
-<option>DF</option>
-</select>
+<input id="origemCidade" placeholder="Cidade origem">
+<input id="origemEstado" placeholder="Estado origem (SP)">
 
-<input list="cidades" id="destino_cidade" placeholder="Cidade destino">
-
-<select id="destino_estado">
-<option>SP</option>
-<option>PR</option>
-<option>MG</option>
-<option>SC</option>
-<option>RS</option>
-<option>RJ</option>
-<option>ES</option>
-<option>BA</option>
-<option>GO</option>
-<option>MT</option>
-<option>MS</option>
-<option>DF</option>
-</select>
+<input id="destinoCidade" placeholder="Cidade destino">
+<input id="destinoEstado" placeholder="Estado destino (PR)">
 
 <input id="peso" placeholder="Peso da carga (toneladas)">
 
-<input id="valor" placeholder="Valor do frete" oninput="formatarMoeda(this)">
+<input id="valor" placeholder="Valor do frete">
 
-<select id="tipo_frete">
+<select id="tipoFrete">
 <option value="tonelada">Frete por tonelada</option>
 <option value="fechado">Frete fechado</option>
 </select>
@@ -136,158 +94,105 @@ color:#444;
 
 </div>
 
+
 <h2>Cargas disponíveis</h2>
 
-<div id="cargas"></div>
+<div id="lista"></div>
 
 </div>
 
-<datalist id="cidades">
-<option>SÃO PAULO</option>
-<option>CURITIBA</option>
-<option>CAMPINAS</option>
-<option>SANTOS</option>
-<option>REGISTRO</option>
-<option>COLOMBO</option>
-<option>PORTO ALEGRE</option>
-<option>FLORIANÓPOLIS</option>
-<option>BELO HORIZONTE</option>
-<option>GOIÂNIA</option>
-<option>BRASÍLIA</option>
-<option>SALVADOR</option>
-<option>FORTALEZA</option>
-<option>RECIFE</option>
-<option>MANAUS</option>
-<option>BELÉM</option>
-<option>CUIABÁ</option>
-<option>CAMPO GRANDE</option>
-<option>LONDRINA</option>
-<option>MARINGÁ</option>
-</datalist>
+
 
 <script>
 
-const coords = {
-"REGISTRO": [-24.497,-47.844],
-"COLOMBO": [-25.291,-49.224],
-"SÃO PAULO": [-23.550,-46.633],
-"SANTOS": [-23.960,-46.333],
-"CURITIBA": [-25.429,-49.271],
-"CAMPINAS": [-22.905,-47.060],
-"PORTO ALEGRE": [-30.034,-51.217],
-"FLORIANÓPOLIS": [-27.595,-48.548],
-"BELO HORIZONTE": [-19.916,-43.934]
-}
+const API="https://cargora-backend.onrender.com"
 
-function distancia(c1,c2){
 
-if(!coords[c1] || !coords[c2]) return null
 
-let lat1=coords[c1][0]
-let lon1=coords[c1][1]
-let lat2=coords[c2][0]
-let lon2=coords[c2][1]
+function formatarMoeda(valor){
 
-const R=6371
-
-let dLat=(lat2-lat1)*Math.PI/180
-let dLon=(lon2-lon1)*Math.PI/180
-
-let a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)*Math.sin(dLon/2)
-
-let c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
-
-return Math.round(R*c)
+return valor.toLocaleString("pt-BR",{
+style:"currency",
+currency:"BRL"
+})
 
 }
 
-function formatarMoeda(input){
 
-let valor=input.value.replace(/\D/g,'')
-
-valor=(valor/100).toFixed(2)+''
-
-valor=valor.replace(".",",")
-
-valor=valor.replace(/(\d)(?=(\d{3})+(?!\d))/g,"$1.")
-
-input.value="R$ "+valor
-
-}
-
-function limparMoeda(valor){
-return Number(valor.replace(/\D/g,''))/100
-}
 
 async function carregarCargas(){
 
-const resposta=await fetch("https://cargora-backend.onrender.com/cargas")
-const cargas=await resposta.json()
+const res=await fetch(API+"/cargas")
 
-const container=document.getElementById("cargas")
-container.innerHTML=""
+const cargas=await res.json()
 
-cargas.forEach(carga=>{
+const lista=document.getElementById("lista")
 
-const km=distancia(carga.origem_cidade,carga.destino_cidade)
+lista.innerHTML=""
+
+cargas.forEach(c=>{
 
 const card=document.createElement("div")
+
 card.className="card"
 
 card.innerHTML=`
 
-<div class="rota">
-${carga.origem_cidade} - ${carga.origem_estado} → ${carga.destino_cidade} - ${carga.destino_estado}
+<div style="font-weight:bold">
+${c.origem_cidade} - ${c.origem_estado} → ${c.destino_cidade} - ${c.destino_estado}
 </div>
 
-<div class="distancia">
-${km ? km+" km aprox." : ""}
+<div style="color:#666">
+${c.distancia?c.distancia+" km aprox":""}
 </div>
 
 <div>
-${carga.peso || ""} toneladas
+${c.toneladas?c.toneladas+" toneladas":""}
 </div>
 
 <div class="valor">
-R$ ${Number(carga.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+${c.valor?formatarMoeda(c.valor):""}
 </div>
 
-<div class="tipo">
-${carga.tipo_frete==="tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
+<div>
+${c.tipo_frete==="tonelada"?"POR TONELADA":"FRETE FECHADO"}
 </div>
 
 `
 
-container.appendChild(card)
+lista.appendChild(card)
 
 })
 
 }
 
+
+
 async function publicarCarga(){
 
-const valorCampo=document.getElementById("valor").value
+const origemCidade=document.getElementById("origemCidade").value.toUpperCase()
+const origemEstado=document.getElementById("origemEstado").value.toUpperCase()
 
-const carga={
+const destinoCidade=document.getElementById("destinoCidade").value.toUpperCase()
+const destinoEstado=document.getElementById("destinoEstado").value.toUpperCase()
 
-origem_cidade:document.getElementById("origem_cidade").value.toUpperCase(),
-origem_estado:document.getElementById("origem_estado").value,
+const toneladas=Number(document.getElementById("peso").value)
 
-destino_cidade:document.getElementById("destino_cidade").value.toUpperCase(),
-destino_estado:document.getElementById("destino_estado").value,
+let valorTexto=document.getElementById("valor").value
 
-peso:Number(document.getElementById("peso").value),
+valorTexto=valorTexto
+.replace("R$","")
+.replace(".","")
+.replace(",",".")
+.trim()
 
-valor:limparMoeda(valorCampo),
+const valor=Number(valorTexto)
 
-tipo_frete:document.getElementById("tipo_frete").value
+const tipo_frete=document.getElementById("tipoFrete").value
 
-}
 
-await fetch("https://cargora-backend.onrender.com/cargas",{
+
+await fetch(API+"/cargas",{
 
 method:"POST",
 
@@ -295,17 +200,34 @@ headers:{
 "Content-Type":"application/json"
 },
 
-body:JSON.stringify(carga)
+body:JSON.stringify({
+
+origem_estado:origemEstado,
+origem_cidade:origemCidade,
+
+destino_estado:destinoEstado,
+destino_cidade:destinoCidade,
+
+toneladas,
+valor,
+tipo_frete
 
 })
+
+})
+
+
 
 carregarCargas()
 
 }
 
+
+
 carregarCargas()
 
 </script>
+
 
 </body>
 </html>
