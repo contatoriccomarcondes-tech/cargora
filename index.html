@@ -3,7 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
-<title>Cargora - Cargas disponíveis</title>
+<title>Cargora</title>
 
 <style>
 
@@ -27,17 +27,20 @@ margin:auto;
 padding:30px;
 }
 
-.filtros{
-margin-bottom:25px;
-display:flex;
-gap:10px;
+.card{
+background:white;
+padding:18px;
+border-radius:8px;
+margin-bottom:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 input{
 padding:10px;
+margin-bottom:8px;
 border-radius:6px;
 border:1px solid #ccc;
-flex:1;
+width:100%;
 }
 
 button{
@@ -47,14 +50,6 @@ background:#0a7cff;
 color:white;
 border-radius:6px;
 cursor:pointer;
-}
-
-.card{
-background:white;
-padding:18px;
-border-radius:8px;
-margin-bottom:15px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 .valor{
@@ -73,6 +68,12 @@ font-size:18px;
 margin-bottom:8px;
 }
 
+.filtros{
+margin-bottom:20px;
+display:flex;
+gap:10px;
+}
+
 </style>
 
 </head>
@@ -85,12 +86,28 @@ margin-bottom:8px;
 
 <div class="container">
 
+<h2>Publicar carga</h2>
+
+<div class="card">
+
+<input id="origem_estado" placeholder="Estado origem">
+<input id="origem_cidade" placeholder="Cidade origem">
+
+<input id="destino_estado" placeholder="Estado destino">
+<input id="destino_cidade" placeholder="Cidade destino">
+
+<input id="valor" placeholder="Valor do frete">
+
+<button onclick="publicarCarga()">Publicar carga</button>
+
+</div>
+
 <h2>Cargas disponíveis</h2>
 
 <div class="filtros">
 
-<input id="origem" placeholder="Cidade origem">
-<input id="destino" placeholder="Cidade destino">
+<input id="origem" placeholder="Filtrar origem">
+<input id="destino" placeholder="Filtrar destino">
 
 <button onclick="filtrar()">Buscar</button>
 
@@ -163,6 +180,32 @@ carga.destino_cidade.toLowerCase().includes(destino)
 )
 
 mostrarCargas(filtradas)
+
+}
+
+async function publicarCarga(){
+
+const carga = {
+
+origem_estado: document.getElementById("origem_estado").value,
+origem_cidade: document.getElementById("origem_cidade").value,
+destino_estado: document.getElementById("destino_estado").value,
+destino_cidade: document.getElementById("destino_cidade").value,
+valor: document.getElementById("valor").value
+
+}
+
+await fetch("https://cargora-backend.onrender.com/cargas", {
+
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify(carga)
+
+})
+
+carregarCargas()
 
 }
 
