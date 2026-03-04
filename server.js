@@ -49,20 +49,16 @@ LISTAR CARGAS
 app.get("/cargas", async (req, res) => {
   try {
 
-    const result = await pool.query(`
-      SELECT *
-      FROM cargas
-      ORDER BY id DESC
-    `);
+    const result = await pool.query("SELECT * FROM cargas");
 
     res.json(result.rows);
 
   } catch (error) {
 
-    console.error("Erro ao buscar cargas:", error);
+    console.error(error);
 
     res.status(500).json({
-      error: "Erro ao buscar cargas"
+      erro_real: error.message
     });
 
   }
