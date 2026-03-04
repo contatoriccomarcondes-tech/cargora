@@ -115,4 +115,35 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});app.post("/cargas", async (req, res) => {
+
+  const {
+    origem_estado,
+    origem_cidade,
+    destino_estado,
+    destino_cidade,
+    valor
+  } = req.body;
+
+  try {
+
+    const result = await pool.query(
+      `
+      INSERT INTO cargas
+      (origem_estado, origem_cidade, destino_estado, destino_cidade, valor, status)
+      VALUES ($1,$2,$3,$4,$5,'aberta')
+      RETURNING *
+      `,
+      [origem_estado, origem_cidade, destino_estado, destino_cidade, valor]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+
+    console.error(error);
+    res.status(500).json({erro:"Erro ao criar carga"});
+
+  }
+
 });
