@@ -1,72 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
+
 <head>
 <meta charset="UTF-8">
 <title>Cargora - Cargas disponíveis</title>
 
 <style>
+
 body{
-font-family: Arial;
+font-family:Arial;
+margin:0;
 background:#f4f6f8;
-padding:40px;
 }
 
-h1{
-color:#333;
+header{
+background:#0f172a;
+color:white;
+padding:20px;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:30px;
+}
+
+.filtros{
+margin-bottom:25px;
+display:flex;
+gap:10px;
+}
+
+input{
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+flex:1;
+}
+
+button{
+padding:10px 15px;
+border:none;
+background:#0a7cff;
+color:white;
+border-radius:6px;
+cursor:pointer;
 }
 
 .card{
 background:white;
-padding:20px;
-margin-bottom:15px;
+padding:18px;
 border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+margin-bottom:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 .valor{
 font-size:20px;
+color:#2563eb;
 font-weight:bold;
-color:#0a7cff;
-}
-
-.rota{
-font-size:18px;
-margin-bottom:10px;
 }
 
 .status{
 color:green;
 font-weight:bold;
 }
+
+.rota{
+font-size:18px;
+margin-bottom:8px;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h1>🚛 Cargas disponíveis</h1>
+<header>
+🚛 Cargora
+</header>
+
+<div class="container">
+
+<h2>Cargas disponíveis</h2>
+
+<div class="filtros">
+
+<input id="origem" placeholder="Cidade origem">
+<input id="destino" placeholder="Cidade destino">
+
+<button onclick="filtrar()">Buscar</button>
+
+</div>
 
 <div id="cargas"></div>
 
+</div>
+
 <script>
+
+let todasCargas = []
 
 async function carregarCargas(){
 
-const resposta = await fetch("https://cargora-backend.onrender.com/cargas");
-const dados = await resposta.json();
+const resposta = await fetch("https://cargora-backend.onrender.com/cargas")
 
-const container = document.getElementById("cargas");
+const cargas = await resposta.json()
 
-dados.forEach(carga => {
+todasCargas = cargas
 
-const div = document.createElement("div");
-div.className = "card";
+mostrarCargas(cargas)
 
-div.innerHTML = `
+}
+
+function mostrarCargas(cargas){
+
+const container = document.getElementById("cargas")
+
+container.innerHTML=""
+
+cargas.forEach(carga => {
+
+const card = document.createElement("div")
+
+card.className="card"
+
+card.innerHTML=`
+
 <div class="rota">
-${carga.origem_estado} - ${carga.origem_cidade}
-→
-${carga.destino_estado} - ${carga.destino_cidade}
+${carga.origem_estado} - ${carga.origem_cidade} → ${carga.destino_estado} - ${carga.destino_cidade}
 </div>
 
 <div class="valor">
@@ -76,15 +141,32 @@ R$ ${carga.valor}
 <div class="status">
 Status: ${carga.status}
 </div>
-`;
 
-container.appendChild(div);
+`
 
-});
+container.appendChild(card)
+
+})
 
 }
 
-carregarCargas();
+function filtrar(){
+
+const origem = document.getElementById("origem").value.toLowerCase()
+const destino = document.getElementById("destino").value.toLowerCase()
+
+const filtradas = todasCargas.filter(carga =>
+
+carga.origem_cidade.toLowerCase().includes(origem) &&
+carga.destino_cidade.toLowerCase().includes(destino)
+
+)
+
+mostrarCargas(filtradas)
+
+}
+
+carregarCargas()
 
 </script>
 
