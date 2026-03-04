@@ -72,36 +72,44 @@ CRIAR CARGA
 
 app.post("/cargas", async (req, res) => {
 
-  try {
+try {
 
-    const {
-      origem_estado,
-      origem_cidade,
-      destino_estado,
-      destino_cidade
-    } = req.body;
+const {
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+peso,
+valor,
+tipo_frete
+} = req.body;
 
-    const result = await pool.query(
-      `
-      INSERT INTO cargas
-      (origem_estado, origem_cidade, destino_estado, destino_cidade)
-      VALUES ($1,$2,$3,$4)
-      RETURNING *
-      `,
-      [origem_estado, origem_cidade, destino_estado, destino_cidade]
-    );
+const result = await pool.query(
+`
+INSERT INTO cargas
+(origem_estado, origem_cidade, destino_estado, destino_cidade, peso, valor, tipo_frete)
+VALUES ($1,$2,$3,$4,$5,$6,$7)
+RETURNING *
+`,
+[
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+peso,
+valor,
+tipo_frete
+]
+);
 
-    res.json(result.rows[0]);
+res.json(result.rows[0]);
 
-  } catch (error) {
+} catch (err) {
 
-    console.error(error);
+console.error(err);
+res.status(500).json({ error: "Erro ao criar carga" });
 
-    res.status(500).json({
-      error: "Erro ao criar carga"
-    });
-
-  }
+}
 
 });
 
