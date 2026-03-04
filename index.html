@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
 <meta charset="UTF-8">
 <title>Cargora</title>
@@ -35,7 +34,7 @@ margin-bottom:15px;
 box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-input{
+input,select{
 padding:10px;
 margin-bottom:8px;
 border-radius:6px;
@@ -58,20 +57,20 @@ color:#2563eb;
 font-weight:bold;
 }
 
-.status{
-color:green;
-font-weight:bold;
-}
-
 .rota{
 font-size:18px;
-margin-bottom:8px;
+margin-bottom:6px;
 }
 
-.filtros{
-margin-bottom:20px;
-display:flex;
-gap:10px;
+.distancia{
+color:#666;
+font-size:14px;
+margin-bottom:6px;
+}
+
+.tipo{
+font-size:14px;
+color:#444;
 }
 
 </style>
@@ -90,13 +89,48 @@ gap:10px;
 
 <div class="card">
 
-<input id="origem_estado" placeholder="Estado origem">
-<input id="origem_cidade" placeholder="Cidade origem">
+<input list="cidades" id="origem_cidade" placeholder="Cidade origem">
 
-<input id="destino_estado" placeholder="Estado destino">
-<input id="destino_cidade" placeholder="Cidade destino">
+<select id="origem_estado">
+<option>SP</option>
+<option>PR</option>
+<option>MG</option>
+<option>SC</option>
+<option>RS</option>
+<option>RJ</option>
+<option>ES</option>
+<option>BA</option>
+<option>GO</option>
+<option>MT</option>
+<option>MS</option>
+<option>DF</option>
+</select>
 
-<input id="valor" placeholder="Valor do frete">
+<input list="cidades" id="destino_cidade" placeholder="Cidade destino">
+
+<select id="destino_estado">
+<option>SP</option>
+<option>PR</option>
+<option>MG</option>
+<option>SC</option>
+<option>RS</option>
+<option>RJ</option>
+<option>ES</option>
+<option>BA</option>
+<option>GO</option>
+<option>MT</option>
+<option>MS</option>
+<option>DF</option>
+</select>
+
+<input id="peso" placeholder="Peso da carga (toneladas)">
+
+<input id="valor" placeholder="Valor do frete" oninput="formatarMoeda(this)">
+
+<select id="tipo_frete">
+<option value="tonelada">Frete por tonelada</option>
+<option value="fechado">Frete fechado</option>
+</select>
 
 <button onclick="publicarCarga()">Publicar carga</button>
 
@@ -104,59 +138,125 @@ gap:10px;
 
 <h2>Cargas disponíveis</h2>
 
-<div class="filtros">
-
-<input id="origem" placeholder="Filtrar origem">
-<input id="destino" placeholder="Filtrar destino">
-
-<button onclick="filtrar()">Buscar</button>
-
-</div>
-
 <div id="cargas"></div>
 
 </div>
 
+<datalist id="cidades">
+<option>SÃO PAULO</option>
+<option>CURITIBA</option>
+<option>CAMPINAS</option>
+<option>SANTOS</option>
+<option>REGISTRO</option>
+<option>COLOMBO</option>
+<option>PORTO ALEGRE</option>
+<option>FLORIANÓPOLIS</option>
+<option>BELO HORIZONTE</option>
+<option>GOIÂNIA</option>
+<option>BRASÍLIA</option>
+<option>SALVADOR</option>
+<option>FORTALEZA</option>
+<option>RECIFE</option>
+<option>MANAUS</option>
+<option>BELÉM</option>
+<option>CUIABÁ</option>
+<option>CAMPO GRANDE</option>
+<option>LONDRINA</option>
+<option>MARINGÁ</option>
+</datalist>
+
 <script>
 
-let todasCargas = []
+const coords = {
+"REGISTRO": [-24.497,-47.844],
+"COLOMBO": [-25.291,-49.224],
+"SÃO PAULO": [-23.550,-46.633],
+"SANTOS": [-23.960,-46.333],
+"CURITIBA": [-25.429,-49.271],
+"CAMPINAS": [-22.905,-47.060],
+"PORTO ALEGRE": [-30.034,-51.217],
+"FLORIANÓPOLIS": [-27.595,-48.548],
+"BELO HORIZONTE": [-19.916,-43.934]
+}
 
-async function carregarCargas(){
+function distancia(c1,c2){
 
-const resposta = await fetch("https://cargora-backend.onrender.com/cargas")
+if(!coords[c1] || !coords[c2]) return null
 
-const cargas = await resposta.json()
+let lat1=coords[c1][0]
+let lon1=coords[c1][1]
+let lat2=coords[c2][0]
+let lon2=coords[c2][1]
 
-todasCargas = cargas
+const R=6371
 
-mostrarCargas(cargas)
+let dLat=(lat2-lat1)*Math.PI/180
+let dLon=(lon2-lon1)*Math.PI/180
+
+let a=
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)*Math.sin(dLon/2)
+
+let c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
+
+return Math.round(R*c)
 
 }
 
-function mostrarCargas(cargas){
+function formatarMoeda(input){
 
-const container = document.getElementById("cargas")
+let valor=input.value.replace(/\D/g,'')
 
+valor=(valor/100).toFixed(2)+''
+
+valor=valor.replace(".",",")
+
+valor=valor.replace(/(\d)(?=(\d{3})+(?!\d))/g,"$1.")
+
+input.value="R$ "+valor
+
+}
+
+function limparMoeda(valor){
+return Number(valor.replace(/\D/g,''))/100
+}
+
+async function carregarCargas(){
+
+const resposta=await fetch("https://cargora-backend.onrender.com/cargas")
+const cargas=await resposta.json()
+
+const container=document.getElementById("cargas")
 container.innerHTML=""
 
-cargas.forEach(carga => {
+cargas.forEach(carga=>{
 
-const card = document.createElement("div")
+const km=distancia(carga.origem_cidade,carga.destino_cidade)
 
+const card=document.createElement("div")
 card.className="card"
 
 card.innerHTML=`
 
 <div class="rota">
-${carga.origem_estado} - ${carga.origem_cidade} → ${carga.destino_estado} - ${carga.destino_cidade}
+${carga.origem_cidade} - ${carga.origem_estado} → ${carga.destino_cidade} - ${carga.destino_estado}
+</div>
+
+<div class="distancia">
+${km ? km+" km aprox." : ""}
+</div>
+
+<div>
+${carga.peso || ""} toneladas
 </div>
 
 <div class="valor">
-R$ ${carga.valor ?? 0}
+R$ ${Number(carga.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}
 </div>
 
-<div class="status">
-Status: ${carga.status}
+<div class="tipo">
+${carga.tipo_frete==="tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
 </div>
 
 `
@@ -167,41 +267,35 @@ container.appendChild(card)
 
 }
 
-function filtrar(){
-
-const origem = document.getElementById("origem").value.toLowerCase()
-const destino = document.getElementById("destino").value.toLowerCase()
-
-const filtradas = todasCargas.filter(carga =>
-
-carga.origem_cidade.toLowerCase().includes(origem) &&
-carga.destino_cidade.toLowerCase().includes(destino)
-
-)
-
-mostrarCargas(filtradas)
-
-}
-
 async function publicarCarga(){
 
-const carga = {
+const valorCampo=document.getElementById("valor").value
 
-origem_estado: document.getElementById("origem_estado").value,
-origem_cidade: document.getElementById("origem_cidade").value,
-destino_estado: document.getElementById("destino_estado").value,
-destino_cidade: document.getElementById("destino_cidade").value,
-valor: Number(document.getElementById("valor").value)
+const carga={
+
+origem_cidade:document.getElementById("origem_cidade").value.toUpperCase(),
+origem_estado:document.getElementById("origem_estado").value,
+
+destino_cidade:document.getElementById("destino_cidade").value.toUpperCase(),
+destino_estado:document.getElementById("destino_estado").value,
+
+peso:Number(document.getElementById("peso").value),
+
+valor:limparMoeda(valorCampo),
+
+tipo_frete:document.getElementById("tipo_frete").value
 
 }
 
-await fetch("https://cargora-backend.onrender.com/cargas", {
+await fetch("https://cargora-backend.onrender.com/cargas",{
 
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
-body: JSON.stringify(carga)
+
+body:JSON.stringify(carga)
 
 })
 
