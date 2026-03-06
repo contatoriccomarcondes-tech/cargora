@@ -1,113 +1,124 @@
-const express = require("express");
-const cors = require("cors");
-const { Pool } = require("pg");
+const express = require("express")
+const cors = require("cors")
+const { Pool } = require("pg")
 
-const app = express();
+const app = express()
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+connectionString: process.env.DATABASE_URL,
+ssl: {
+rejectUnauthorized: false
+}
+})
 
-app.get("/", (req, res) => {
-  res.send("API Cargora funcionando 🚚");
-});
+app.get("/", (req,res)=>{
+res.send("Servidor Cargora rodando 🚛")
+})
 
+/* LISTAR CARGAS */
 
-// LISTAR CARGAS
-app.get("/cargas", async (req, res) => {
+app.get("/cargas", async (req,res)=>{
 
-  try {
+try{
 
-    const result = await pool.query(`
-      SELECT 
-        id,
-        origem_estado,
-        origem_cidade,
-        destino_estado,
-        destino_cidade,
-        toneladas,
-        valor,
-        tipo_frete,
-        status,
-        created_at
-      FROM cargas
-      ORDER BY created_at DESC
-    `);
+const result = await pool.query(`
+SELECT
+id,
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+toneladas,
+valor,
+tipo_frete,
+created_at
+FROM cargas
+ORDER BY id DESC
+`)
 
-    res.json(result.rows);
+res.json(result.rows)
 
-  } catch (error) {
+}catch(err){
 
-    console.error(error);
-    res.status(500).json({ error: "Erro ao buscar cargas" });
+console.error(err)
 
-  }
+res.status(500).json({erro:"Erro ao buscar cargas"})
 
-});
+}
 
+})
 
-// CRIAR CARGA
-app.post("/cargas", async (req, res) => {
-console.log ("Body Recebido:", req.body)
+/* PUBLICAR CARGA */
 
-  try {
+app.post("/cargas", async (req,res)=>{
 
-    const {
-      origem_estado,
-      origem_cidade,
-      destino_estado,
-      destino_cidade,
-      toneladas,
-      valor,
-      tipo_frete
-    } = req.body;
+try{
 
-    const result = await pool.query(
-      `
-      INSERT INTO cargas
-      (
-        origem_estado,
-        origem_cidade,
-        destino_estado,
-        destino_cidade,
-        toneladas,
-        valor,
-        tipo_frete
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
-      RETURNING *
-      `,
-      [
-        origem_estado,
-        origem_cidade,
-        destino_estado,
-        destino_cidade,
-        toneladas,
-        valor,
-        tipo_frete
-      ]
-    );
+const {
 
-    res.json(result.rows[0]);
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+toneladas,
+valor,
+tipo_frete
 
-  } catch (error) {
+} = req.body
 
-    console.error(error);
-    res.status(500).json({ error: "Erro ao criar carga" });
+const result = await pool.query(
 
-  }
+`
+INSERT INTO cargas(
 
-});
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+toneladas,
+valor,
+tipo_frete
 
+)
 
-const PORT = process.env.PORT || 3000;
+VALUES ($1,$2,$3,$4,$5,$6,$7)
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+RETURNING *
+`,
+
+[
+origem_estado,
+origem_cidade,
+destino_estado,
+destino_cidade,
+toneladas,
+valor,
+tipo_frete
+]
+
+)
+
+res.json(result.rows[0])
+
+}catch(err){
+
+console.error(err)
+
+res.status(500).json({erro:"Erro ao inserir carga"})
+
+}
+
+})
+
+/* PORTA */
+
+const PORT = process.env.PORT || 10000
+
+app.listen(PORT, ()=>{
+
+console.log("Servidor rodando na porta", PORT)
+
+})
