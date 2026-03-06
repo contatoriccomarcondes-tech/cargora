@@ -139,7 +139,7 @@ const tipo_frete = document.getElementById("tipoFrete").value
 console.log(toneladas, valor, tipo_frete)
 
 
-await fetch("https://cargora-backend.onrender-1.com/cargas",{
+await fetch("https://cargora-backend-1.onrender.com/cargas",{
 
 method:"POST",
 
@@ -170,7 +170,7 @@ carregarCargas()
 
 async function carregarCargas(){
 
-const resposta = await fetch("https://cargora-backend.onrender-1.com/cargas")
+const resposta = await fetch("https://cargora-backend-1.onrender.com/cargas")
 
 const cargas = await resposta.json()
 
