@@ -132,12 +132,16 @@ const valor=parseFloat(document.getElementById("valor").valu ||0)
 
 const tipoFrete=document.getElementById("tipoFrete").value
 
-if(!origemCidade || !destinoCidade || !toneladas || !valor){
-
+if(
+origemCidade.trim() === "" ||
+origemEstado.trim() === "" ||
+destinoCidade.trim() === "" ||
+destinoEstado.trim() === "" ||
+document.getElementById("toneladas").value === "" ||
+document.getElementById("valor").value === ""
+){
 alert("Preencha todos os campos")
-
 return
-
 }
 
 console.log("Enviando carga:",{
