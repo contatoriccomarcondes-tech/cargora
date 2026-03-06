@@ -10,62 +10,71 @@
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+background:#f4f6f9;
 margin:0;
 }
 
 header{
-background:#0c1c3c;
+background:#0d1b2a;
 color:white;
 padding:15px;
 font-size:20px;
 }
 
 .container{
-max-width:800px;
+width:90%;
+max-width:700px;
 margin:auto;
-padding:20px;
+margin-top:20px;
 }
 
 .card{
 background:white;
 padding:15px;
-border-radius:8px;
+border-radius:10px;
 margin-bottom:15px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
-input,select,button{
+input,select{
+
 width:100%;
 padding:10px;
 margin-top:8px;
+margin-bottom:10px;
 border-radius:6px;
 border:1px solid #ccc;
-font-size:15px;
+
 }
 
 button{
-background:#2f6fed;
+
+background:#3b82f6;
 color:white;
 border:none;
+padding:12px;
+width:100%;
+border-radius:6px;
 cursor:pointer;
+
 }
 
 .valor{
-color:#2f6fed;
-font-size:20px;
+
+color:#2563eb;
 font-weight:bold;
+font-size:18px;
+
 }
 
 </style>
 
 </head>
 
-
 <body>
 
 <header>
-🚛 Cargora
+🚚 Cargora
 </header>
 
 
@@ -76,87 +85,126 @@ font-weight:bold;
 <h2>Publicar carga</h2>
 
 <input id="origemCidade" placeholder="Cidade origem">
+
 <input id="origemEstado" placeholder="Estado origem (SP)">
 
 <input id="destinoCidade" placeholder="Cidade destino">
+
 <input id="destinoEstado" placeholder="Estado destino (PR)">
 
-<input id="peso" placeholder="Peso da carga (toneladas)">
+<input id="toneladas" placeholder="Peso da carga (toneladas)">
 
 <input id="valor" placeholder="Valor do frete">
 
 <select id="tipoFrete">
+
 <option value="tonelada">Frete por tonelada</option>
+
 <option value="fechado">Frete fechado</option>
+
 </select>
 
-<button onclick="publicarCarga()">Publicar carga</button>
+<button onclick="publicarCarga()">
+Publicar carga
+</button>
 
 </div>
 
 
 <h2>Cargas disponíveis</h2>
 
-<div id="lista"></div>
+<div id="listaCargas"></div>
 
 </div>
 
 
-
 <script>
 
-const API="https://cargora-backend.onrender.com"
+async function publicarCarga(){
+
+const origemCidade = document.getElementById("origemCidade").value.toUpperCase()
+
+const origemEstado = document.getElementById("origemEstado").value.toUpperCase()
+
+const destinoCidade = document.getElementById("destinoCidade").value.toUpperCase()
+
+const destinoEstado = document.getElementById("destinoEstado").value.toUpperCase()
+
+const toneladas = document.getElementById("toneladas").value
+
+const valor = document.getElementById("valor").value
+
+const tipo_frete = document.getElementById("tipoFrete").value
+
+console.log(toneladas, valor, tipo_frete)
 
 
+await fetch("https://cargora-backend.onrender.com/cargas",{
 
-function formatarMoeda(valor){
+method:"POST",
 
-return valor.toLocaleString("pt-BR",{
-style:"currency",
-currency:"BRL"
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+origem_estado: origemEstado,
+origem_cidade: origemCidade,
+
+destino_estado: destinoEstado,
+destino_cidade: destinoCidade,
+
+toneladas,
+valor,
+tipo_frete
+
 })
+
+})
+
+carregarCargas()
 
 }
 
 
-
 async function carregarCargas(){
 
-const res=await fetch(API+"/cargas")
+const resposta = await fetch("https://cargora-backend.onrender.com/cargas")
 
-const cargas=await res.json()
+const cargas = await resposta.json()
 
-const lista=document.getElementById("lista")
+const lista = document.getElementById("listaCargas")
 
 lista.innerHTML=""
 
-cargas.forEach(c=>{
+cargas.forEach(carga=>{
 
-const card=document.createElement("div")
+const card = document.createElement("div")
 
 card.className="card"
 
 card.innerHTML=`
 
-<div style="font-weight:bold">
-${c.origem_cidade} - ${c.origem_estado} → ${c.destino_cidade} - ${c.destino_estado}
-</div>
+<b>${carga.origem_cidade} - ${carga.origem_estado}
+→
+${carga.destino_cidade} - ${carga.destino_estado}</b>
 
-<div style="color:#666">
-${c.distancia?c.distancia+" km aprox":""}
-</div>
+<br>
 
-<div>
-${c.toneladas?c.toneladas+" toneladas":""}
-</div>
+${carga.toneladas || "-"} toneladas
 
-<div class="valor">
-${c.valor?formatarMoeda(c.valor):""}
-</div>
+<br>
 
-<div>
-${c.tipo_frete==="tonelada"?"POR TONELADA":"FRETE FECHADO"}
-</div>
+<span class="valor">
+
+R$ ${carga.valor || "0"}
+
+</span>
+
+<br>
+
+${carga.tipo_frete === "tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
 
 `
 
@@ -167,67 +215,10 @@ lista.appendChild(card)
 }
 
 
-
-async function publicarCarga(){
-
-const origemCidade=document.getElementById("origemCidade").value.toUpperCase()
-const origemEstado=document.getElementById("origemEstado").value.toUpperCase()
-
-const destinoCidade=document.getElementById("destinoCidade").value.toUpperCase()
-const destinoEstado=document.getElementById("destinoEstado").value.toUpperCase()
-
-const toneladas=Number(document.getElementById("peso").value)
-
-let valorTexto=document.getElementById("valor").value
-
-valorTexto=valorTexto
-.replace("R$","")
-.replace(".","")
-.replace(",",".")
-.trim()
-
-const valor=Number(valorTexto)
-
-const tipo_frete=document.getElementById("tipoFrete").value
-
-
-
-await fetch(API+"/cargas",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-origem_estado:origemEstado,
-origem_cidade:origemCidade,
-
-destino_estado:destinoEstado,
-destino_cidade:destinoCidade,
-
-toneladas,
-valor,
-tipo_frete
-
-})
-
-})
-
-
-
-carregarCargas()
-
-}
-
-
-
 carregarCargas()
 
 </script>
 
-
 </body>
+
 </html>
