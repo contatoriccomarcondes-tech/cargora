@@ -1,3 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cargora</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f8;
+margin:0;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+}
+
+.form{
+background:white;
+padding:20px;
+border-radius:8px;
+margin-bottom:20px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+padding:10px;
+border:none;
+background:#0b5cff;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:8px;
+margin-bottom:15px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.rota{
+font-weight:bold;
+font-size:16px;
+margin-bottom:8px;
+}
+
+.info{
+margin-bottom:5px;
+}
+
+.interesse{
+margin-top:10px;
+background:#16a34a;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>CARGORA</h1>
+
+<div class="form">
+
+<h3>Publicar carga</h3>
+
+<input id="origemCidade" placeholder="Cidade origem">
+<input id="origemEstado" placeholder="Estado origem">
+
+<input id="destinoCidade" placeholder="Cidade destino">
+<input id="destinoEstado" placeholder="Estado destino">
+
+<input id="toneladas" type="number" placeholder="Toneladas">
+
+<input id="valor" type="number" placeholder="Valor frete">
+
+<select id="tipoFrete">
+<option value="tonelada">Frete por tonelada</option>
+<option value="fechado">Frete fechado</option>
+</select>
+
+<button onclick="publicarCarga()">Publicar carga</button>
+
+</div>
+
+<div id="listaCargas"></div>
+
+</div>
+
 <script>
 
 const API = "https://cargora-backend-1.onrender.com"
@@ -34,8 +147,6 @@ return
 const toneladas = Number(toneladasInput)
 const valor = Number(valorInput)
 
-try{
-
 await fetch(`${API}/cargas`,{
 
 method:"POST",
@@ -59,13 +170,6 @@ tipo_frete: tipoFrete
 })
 
 carregarCargas()
-
-}catch(err){
-
-console.error(err)
-alert("Erro ao publicar carga")
-
-}
 
 }
 
@@ -123,3 +227,6 @@ Tenho interesse
 carregarCargas()
 
 </script>
+
+</body>
+</html>
