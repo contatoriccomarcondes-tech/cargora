@@ -54,6 +54,7 @@ app.get("/cargas", async (req, res) => {
 
 // CRIAR CARGA
 app.post("/cargas", async (req, res) => {
+console.log ("Body Recebido:", req.body)
 
   try {
 
