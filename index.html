@@ -4,67 +4,74 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Cargora</title>
 
 <style>
 
 body{
-font-family:Arial;
-background:#f4f6f9;
+font-family: Arial;
+background:#f4f6f8;
 margin:0;
+padding:20px;
 }
 
-header{
-background:#0d1b2a;
-color:white;
-padding:15px;
-font-size:20px;
+h1{
+text-align:center;
 }
 
 .container{
-width:90%;
 max-width:700px;
 margin:auto;
-margin-top:20px;
+}
+
+.form{
+background:white;
+padding:20px;
+border-radius:8px;
+margin-bottom:20px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+padding:10px;
+border:none;
+background:#0b5cff;
+color:white;
+border-radius:5px;
+cursor:pointer;
 }
 
 .card{
 background:white;
 padding:15px;
-border-radius:10px;
+border-radius:8px;
 margin-bottom:15px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
-input,select{
-
-width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:10px;
-border-radius:6px;
-border:1px solid #ccc;
-
-}
-
-button{
-
-background:#3b82f6;
-color:white;
-border:none;
-padding:12px;
-width:100%;
-border-radius:6px;
-cursor:pointer;
-
-}
-
-.valor{
-
-color:#2563eb;
+.rota{
 font-weight:bold;
-font-size:18px;
+font-size:16px;
+margin-bottom:8px;
+}
 
+.info{
+margin-bottom:5px;
+}
+
+.interesse{
+margin-top:10px;
+background:#16a34a;
 }
 
 </style>
@@ -73,73 +80,72 @@ font-size:18px;
 
 <body>
 
-<header>
-🚚 Cargora
-</header>
-
-
 <div class="container">
 
-<div class="card">
+<h1>CARGORA</h1>
 
-<h2>Publicar carga</h2>
+<div class="form">
+
+<h3>Publicar carga</h3>
 
 <input id="origemCidade" placeholder="Cidade origem">
-
-<input id="origemEstado" placeholder="Estado origem (SP)">
+<input id="origemEstado" placeholder="Estado origem">
 
 <input id="destinoCidade" placeholder="Cidade destino">
+<input id="destinoEstado" placeholder="Estado destino">
 
-<input id="destinoEstado" placeholder="Estado destino (PR)">
+<input id="toneladas" type="number" placeholder="Toneladas">
 
-<input id="toneladas" placeholder="Peso da carga (toneladas)">
-
-<input id="valor" placeholder="Valor do frete">
+<input id="valor" type="number" placeholder="Valor frete">
 
 <select id="tipoFrete">
-
 <option value="tonelada">Frete por tonelada</option>
-
 <option value="fechado">Frete fechado</option>
-
 </select>
 
-<button onclick="publicarCarga()">
-Publicar carga
-</button>
+<button onclick="publicarCarga()">Publicar carga</button>
 
 </div>
-
-
-<h2>Cargas disponíveis</h2>
 
 <div id="listaCargas"></div>
 
 </div>
 
-
 <script>
+
+const API = "https://cargora-backend-1.onrender.com"
+
+function tempoPublicado(data){
+
+const agora = new Date()
+
+const criado = new Date(data)
+
+const minutos = Math.floor((agora-criado)/60000)
+
+if(minutos<1)return "Publicado agora"
+
+if(minutos<60)return `Publicado há ${minutos} min`
+
+const horas=Math.floor(minutos/60)
+
+return `Publicado há ${horas} h`
+
+}
 
 async function publicarCarga(){
 
-const origemCidade = document.getElementById("origemCidade").value.toUpperCase()
+const origemCidade=document.getElementById("origemCidade").value.toUpperCase()
+const origemEstado=document.getElementById("origemEstado").value.toUpperCase()
 
-const origemEstado = document.getElementById("origemEstado").value.toUpperCase()
+const destinoCidade=document.getElementById("destinoCidade").value.toUpperCase()
+const destinoEstado=document.getElementById("destinoEstado").value.toUpperCase()
 
-const destinoCidade = document.getElementById("destinoCidade").value.toUpperCase()
+const toneladas=document.getElementById("toneladas").value
+const valor=document.getElementById("valor").value
+const tipoFrete=document.getElementById("tipoFrete").value
 
-const destinoEstado = document.getElementById("destinoEstado").value.toUpperCase()
-
-const toneladas = document.getElementById("toneladas").value
-
-const valor = document.getElementById("valor").value
-
-const tipofrete = document.getElementById("tipoFrete").value
-
-console.log(toneladas, valor, tipofrete)
-
-
-await fetch("https://cargora-backend-1.onrender.com/cargas",{
+await fetch(`${API}/cargas`,{
 
 method:"POST",
 
@@ -149,15 +155,15 @@ headers:{
 
 body:JSON.stringify({
 
-origem_estado: origemEstado,
-origem_cidade: origemCidade,
+origem_estado:origemEstado,
+origem_cidade:origemCidade,
 
-destino_estado: destinoEstado,
-destino_cidade: destinoCidade,
+destino_estado:destinoEstado,
+destino_cidade:destinoCidade,
 
-toneladas: toneladas,
-valor: valor,
-tipofrete: tipofrete
+toneladas:toneladas,
+valor:valor,
+tipo_frete:tipoFrete
 
 })
 
@@ -167,53 +173,73 @@ carregarCargas()
 
 }
 
+function distanciaFake(){
+
+return Math.floor(Math.random()*800)+50
+
+}
 
 async function carregarCargas(){
 
-const resposta = await fetch("https://cargora-backend-1.onrender.com/cargas")
+const res=await fetch(`${API}/cargas`)
 
-const cargas = await resposta.json()
+const cargas=await res.json()
 
-const lista = document.getElementById("listaCargas")
+const lista=document.getElementById("listaCargas")
 
 lista.innerHTML=""
 
-cargas.forEach(carga=>{
+cargas.reverse().forEach(c=>{
 
-const card = document.createElement("div")
+const tipo=c.tipo_frete==="tonelada"?"POR TONELADA":"FRETE FECHADO"
 
-card.className="card"
+lista.innerHTML+=`
 
-card.innerHTML=`
+<div class="card">
 
-<b>${carga.origem_cidade} - ${carga.origem_estado}
-→
-${carga.destino_cidade} - ${carga.destino_estado}</b>
+<div class="rota">
 
-<br>
+📦 ${c.origem_cidade} - ${c.origem_estado} → ${c.destino_cidade} - ${c.destino_estado}
 
-${carga.toneladas || "-"} toneladas
+</div>
 
-<br>
+<div class="info">
 
-<span class="valor">
+📏 ${distanciaFake()} km aprox
 
-R$ ${carga.valor || "0"}
+</div>
 
-</span>
+<div class="info">
 
-<br>
+🚚 ${c.toneladas} toneladas
 
-${carga.tipofrete === "tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
+</div>
+
+<div class="info">
+
+💰 R$ ${c.valor}
+
+</div>
+
+<div class="info">
+
+${tipo}
+
+</div>
+
+<button class="interesse">
+
+Tenho interesse
+
+</button>
+
+</div>
 
 `
-
-lista.appendChild(card)
 
 })
 
 }
-
 
 carregarCargas()
 
