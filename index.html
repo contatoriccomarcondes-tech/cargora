@@ -134,9 +134,9 @@ const toneladas = document.getElementById("toneladas").value
 
 const valor = document.getElementById("valor").value
 
-const tipo_frete = document.getElementById("tipoFrete").value
+const tipofrete = document.getElementById("tipoFrete").value
 
-console.log(toneladas, valor, tipo_frete)
+console.log(toneladas, valor, tipofrete)
 
 
 await fetch("https://cargora-backend-1.onrender.com/cargas",{
@@ -157,7 +157,7 @@ destino_cidade: destinoCidade,
 
 toneladas: toneladas,
 valor: valor,
-tipo_frete: tipoFrete
+tipofrete: tipofrete
 
 })
 
@@ -204,7 +204,7 @@ R$ ${carga.valor || "0"}
 
 <br>
 
-${carga.tipo_frete === "tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
+${carga.tipofrete === "tonelada" ? "POR TONELADA" : "FRETE FECHADO"}
 
 `
 
