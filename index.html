@@ -147,6 +147,18 @@ return
 const toneladas = Number(toneladasInput)
 const valor = Number(valorInput)
 
+/* DEBUG */
+
+console.log("Enviando carga:",{
+origem_estado: origemEstado,
+origem_cidade: origemCidade,
+destino_estado: destinoEstado,
+destino_cidade: destinoCidade,
+toneladas: toneladas,
+valor: valor,
+tipo_frete: tipoFrete
+})
+
 await fetch(`${API}/cargas`,{
 
 method:"POST",
