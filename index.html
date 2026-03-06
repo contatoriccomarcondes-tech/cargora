@@ -115,22 +115,8 @@ background:#16a34a;
 
 const API = "https://cargora-backend-1.onrender.com"
 
-function tempoPublicado(data){
-
-const agora = new Date()
-
-const criado = new Date(data)
-
-const minutos = Math.floor((agora-criado)/60000)
-
-if(minutos<1)return "Publicado agora"
-
-if(minutos<60)return `Publicado há ${minutos} min`
-
-const horas=Math.floor(minutos/60)
-
-return `Publicado há ${horas} h`
-
+function distanciaFake(){
+return Math.floor(Math.random()*800)+50
 }
 
 async function publicarCarga(){
@@ -141,9 +127,30 @@ const origemEstado=document.getElementById("origemEstado").value.toUpperCase()
 const destinoCidade=document.getElementById("destinoCidade").value.toUpperCase()
 const destinoEstado=document.getElementById("destinoEstado").value.toUpperCase()
 
-const toneladas=document.getElementById("toneladas").value
-const valor=document.getElementById("valor").value
+const toneladas=parseInt(document.getElementById("toneladas").value)
+const valor=parseFloat(document.getElementById("valor").value)
+
 const tipoFrete=document.getElementById("tipoFrete").value
+
+if(!origemCidade || !destinoCidade || !toneladas || !valor){
+
+alert("Preencha todos os campos")
+
+return
+
+}
+
+console.log("Enviando carga:",{
+
+origem_estado:origemEstado,
+origem_cidade:origemCidade,
+destino_estado:destinoEstado,
+destino_cidade:destinoCidade,
+toneladas:toneladas,
+valor:valor,
+tipo_frete:tipoFrete
+
+})
 
 await fetch(`${API}/cargas`,{
 
@@ -170,12 +177,6 @@ tipo_frete:tipoFrete
 })
 
 carregarCargas()
-
-}
-
-function distanciaFake(){
-
-return Math.floor(Math.random()*800)+50
 
 }
 
