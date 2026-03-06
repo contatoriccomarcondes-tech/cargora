@@ -121,40 +121,34 @@ return Math.floor(Math.random()*800)+50
 
 async function publicarCarga(){
 
-const origemCidade=document.getElementById("origemCidade").value.toUpperCase()
-const origemEstado=document.getElementById("origemEstado").value.toUpperCase()
+const origemCidade = document.getElementById("origemCidade").value.toUpperCase().trim()
+const origemEstado = document.getElementById("origemEstado").value.toUpperCase().trim()
 
-const destinoCidade=document.getElementById("destinoCidade").value.toUpperCase()
-const destinoEstado=document.getElementById("destinoEstado").value.toUpperCase()
+const destinoCidade = document.getElementById("destinoCidade").value.toUpperCase().trim()
+const destinoEstado = document.getElementById("destinoEstado").value.toUpperCase().trim()
 
-const toneladas=parseInt(document.getElementById("toneladas").value||0)
-const valor=parseFloat(document.getElementById("valor").valu ||0)
+const toneladasInput = document.getElementById("toneladas").value
+const valorInput = document.getElementById("valor").value
 
-const tipoFrete=document.getElementById("tipoFrete").value
+const tipoFrete = document.getElementById("tipoFrete").value
 
+// validação correta
 if(
-origemCidade.trim() === "" ||
-origemEstado.trim() === "" ||
-destinoCidade.trim() === "" ||
-destinoEstado.trim() === "" ||
-document.getElementById("toneladas").value === "" ||
-document.getElementById("valor").value === ""
+origemCidade === "" ||
+origemEstado === "" ||
+destinoCidade === "" ||
+destinoEstado === "" ||
+toneladasInput === "" ||
+valorInput === ""
 ){
 alert("Preencha todos os campos")
 return
 }
 
-console.log("Enviando carga:",{
+const toneladas = Number(toneladasInput)
+const valor = Number(valorInput)
 
-origem_estado:origemEstado,
-origem_cidade:origemCidade,
-destino_estado:destinoEstado,
-destino_cidade:destinoCidade,
-toneladas:toneladas,
-valor:valor,
-tipo_frete:tipoFrete
-
-})
+try{
 
 await fetch(`${API}/cargas`,{
 
@@ -166,19 +160,29 @@ headers:{
 
 body:JSON.stringify({
 
-origem_estado:origemEstado,
-origem_cidade:origemCidade,
-
-destino_estado:destinoEstado,
-destino_cidade:destinoCidade,
-
-toneladas:number (toneladas),
-valor: number (valor),
-tipo_frete:tipoFrete
+origem_estado: origemEstado,
+origem_cidade: origemCidade,
+destino_estado: destinoEstado,
+destino_cidade: destinoCidade,
+toneladas: toneladas,
+valor: valor,
+tipo_frete: tipoFrete
 
 })
 
 })
+
+carregarCargas()
+
+}catch(err){
+
+console.error("Erro ao enviar carga", err)
+
+alert("Erro ao publicar carga")
+
+}
+
+}
 
 carregarCargas()
 
