@@ -127,8 +127,8 @@ const origemEstado = document.getElementById("origemEstado").value.toUpperCase()
 const destinoCidade = document.getElementById("destinoCidade").value.toUpperCase().trim()
 const destinoEstado = document.getElementById("destinoEstado").value.toUpperCase().trim()
 
-const toneladasInput = document.getElementById("toneladas").value
-const valorInput = document.getElementById("valor").value
+const toneladasInput = parseInt.getElementById("toneladas").value
+const valorInput = parseInt.getElementById("valor").value
 
 const tipoFrete = document.getElementById("tipoFrete").value
 
@@ -149,7 +149,7 @@ const valor = Number(valorInput)
 
 /* DEBUG */
 
-console.log("Enviando carga:",{
+console.log({
 origem_estado: origemEstado,
 origem_cidade: origemCidade,
 destino_estado: destinoEstado,
