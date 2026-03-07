@@ -4,7 +4,7 @@ const { Pool } = require("pg")
 
 const app = express()
 
-app.use(cors())
+app.use(cors({ origin: "*" }))
 app.use(express.json())
 
 const pool = new Pool({
@@ -44,7 +44,6 @@ res.json(result.rows)
 }catch(err){
 
 console.error(err)
-
 res.status(500).json({erro:"Erro ao buscar cargas"})
 
 }
@@ -57,17 +56,18 @@ app.post("/cargas", async (req,res)=>{
 
 try{
 
-const {
+console.log("BODY RECEBIDO:", req.body)
 
-origem_estado,
-origem_cidade,
-destino_estado,
-destino_cidade,
-toneladas,
-valor,
-tipo_frete
+const body = req.body
 
-} = req.body
+const origem_estado = body.origem_estado
+const origem_cidade = body.origem_cidade
+const destino_estado = body.destino_estado
+const destino_cidade = body.destino_cidade
+
+const toneladas = Number(body.toneladas)
+const valor = Number(body.valor)
+const tipo_frete = body.tipo_frete
 
 const result = await pool.query(
 
@@ -106,7 +106,6 @@ res.json(result.rows[0])
 }catch(err){
 
 console.error(err)
-
 res.status(500).json({erro:"Erro ao inserir carga"})
 
 }
